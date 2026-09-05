@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anna Salova</title>
+<meta name="description" content="Anna Salova — operations, creative direction and cultural ventures. I plug in at any stage of a project: from naming the idea to rebuilding processes that stopped scaling. Berlin, worldwide.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://fsalova.github.io/">
+<meta property="og:title" content="Anna Salova — Operations & Creative Direction">
+<meta property="og:description" content="Anna Salova — operations, creative direction and cultural ventures. I plug in at any stage of a project: from naming the idea to rebuilding processes that stopped scaling. Berlin, worldwide.">
+<meta property="og:image" content="https://fsalova.github.io/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Anna Salova — Operations & Creative Direction">
+<meta name="twitter:description" content="Anna Salova — operations, creative direction and cultural ventures. I plug in at any stage of a project: from naming the idea to rebuilding processes that stopped scaling. Berlin, worldwide.">
+<meta name="twitter:image" content="https://fsalova.github.io/preview.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=PT+Sans:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -85,6 +95,7 @@ section{padding:6rem 0}
 
 .contact-section{padding:5rem 0 6rem}
 .contact-row{display:flex;align-items:center;justify-content:space-between;gap:3rem;flex-wrap:wrap}
+.flower-box{flex:0 0 auto}
 .flower{font-family:var(--mono);font-size:6px;line-height:1;white-space:pre;color:var(--text);opacity:.9;user-select:none}
 .contact-name{font-family:var(--serif);font-size:clamp(2rem,4vw,3.5rem);margin-bottom:1.5rem}
 .contact-links{display:flex;flex-direction:column;gap:.5rem}
@@ -110,8 +121,16 @@ section{padding:6rem 0}
   .hero-name{margin-bottom:.4rem}
   #nc{height:clamp(78px,22vw,120px)}
   .hero-intro{font-size:1rem;line-height:1.6}
-  .contact-row{gap:2rem}
-  .flower{font-size:3.3px}
+  .contact-row{gap:1rem;flex-wrap:nowrap;align-items:center}
+  .flower-box{width:132px;height:76px;position:relative;overflow:hidden;flex:0 0 auto}
+  .flower{position:absolute;top:0;left:0;font-size:6px;transform:scale(.2955);transform-origin:top left}
+  .ticker-section{padding:2rem 0}
+  .ticker{animation:none;width:100%;display:block;text-align:center}
+  .ticker-run{display:block}
+  .ticker-run:nth-child(2){display:none}
+  .ticker-run i{display:none}
+  .ticker-run span:not(:first-child){display:none}
+  .ticker-run span{display:block;white-space:normal;font-size:1.55rem;line-height:1.25;padding:0 1.4rem}
   .stage-lead{margin-bottom:1.6rem}
   .stage{padding:1.5rem 1.3rem}
   .stage-title{font-size:1.5rem}
@@ -162,7 +181,7 @@ section{padding:6rem 0}
 </div>
 </section>
 
-<section class="contact-section"><div class="container"><div class="contact-row"><div><h2 class="contact-name">Let's talk.</h2><div class="contact-links"><a href="mailto:fsalova@gmail.com">fsalova@gmail.com</a><a href="tel:+4915906371886">+49 159 0637 1886</a></div></div><pre class="flower" id="flower" aria-hidden="true"></pre></div></div></section>
+<section class="contact-section"><div class="container"><div class="contact-row"><div><h2 class="contact-name">Let's talk.</h2><div class="contact-links"><a href="mailto:fsalova@gmail.com">fsalova@gmail.com</a><a href="tel:+4915906371886">+49 159 0637 1886</a></div></div><div class="flower-box"><pre class="flower" id="flower" aria-hidden="true"></pre></div></div></div></section>
 </div>
 
 <script>
@@ -180,7 +199,7 @@ function resize(){
   const ov=document.getElementById('hero-overlay');
   const ovH=ov?ov.getBoundingClientRect().height:0;
   const narrow=W<820;
-  let scale,ox,oy;
+  let scale;
   if(narrow){
     // узкий экран: высота hero = орнамент + текст, без пустого поля сверху
     const pad=18,maxH=window.innerHeight;
@@ -190,22 +209,46 @@ function resize(){
       scale=Math.max((maxH-ovH-pad*2)/SVG_H,W*.45/SVG_W);
       need=Math.min(maxH,ovH+SVG_H*scale+pad*2);
     }
-    H=Math.round(need);
-    section.style.height=H+'px';
-    ox=(W-SVG_W*scale)/2;
-    oy=pad;
+    section.style.height=Math.round(need)+'px';
   }else{
     section.style.height='';
-    H=section.clientHeight||window.innerHeight;
-    // орнамент вписывается в свободное место над текстом, чтобы не наезжать на имя
+  }
+  // размеры берём с фактического бокса секции, иначе битмап растягивается
+  // и орнамент деформируется (ловилось на андроиде при перевёрстке текста)
+  const rect=section.getBoundingClientRect();
+  W=Math.round(rect.width); H=Math.round(rect.height);
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  let ox,oy;
+  if(narrow){
+    scale=Math.min(scale,(H-ovH-36)/SVG_H);
+    ox=(W-SVG_W*scale)/2;
+    oy=Math.max(10,(H-ovH-SVG_H*scale)/2);
+  }else{
     const pad=24, avail=Math.max(H-ovH,H*0.35);
     scale=Math.min(W*.88/SVG_W,(avail-pad*2)/SVG_H);
     ox=(W-SVG_W*scale)/2;
     oy=Math.max(pad,(avail-SVG_H*scale)/2);
   }
-  canvas.width=W;canvas.height=H;
   targets=SVG_DOTS.map(([x,y])=>({x:ox+x*scale,y:oy+y*scale}));
   assigned=new Array(targets.length).fill(false);
+}
+
+// пересборка раскладки без сброса уже осевших точек
+let _rlt;
+function relayout(){
+  clearTimeout(_rlt);
+  _rlt=setTimeout(()=>{
+    resize();
+    particles.forEach(p=>{
+      if(p.ti<targets.length){
+        p.targetX=targets[p.ti].x; p.targetY=targets[p.ti].y;
+        if(p.settled){p.x=p.targetX;p.y=p.targetY;}
+      }
+    });
+  },120);
 }
 
 const particles=[];const DOT=1.3;
@@ -388,7 +431,6 @@ if(isMobile){
   },500);
 }
 
-section.addEventListener('touchmove',(e)=>{e.preventDefault();},{passive:false});
 
 function animate(){ctx.clearRect(0,0,W,H);particles.forEach(p=>{p.update();p.draw();});requestAnimationFrame(animate);}
 
@@ -403,19 +445,13 @@ document.querySelectorAll('.approach-item,.project-card').forEach(el=>{
   el.style.opacity=0;el.style.transform='translateY(12px)';el.style.transition='opacity .5s,transform .5s';obs.observe(el);});
 
 resize();animate();
-if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>{if(!particles.length)resize();});}
-window.addEventListener('resize',()=>{
-  const oldW=W,oldH=H;
-  resize();
-  // Reposition settled particles to new target positions
-  particles.forEach(p=>{
-    if(p.settled||p.settling){
-      p.targetX=targets[p.ti].x;p.targetY=targets[p.ti].y;
-      if(p.settled){p.x=p.targetX;p.y=p.targetY;}
-    }
-  });
-  if(nameBuilt){clearTimeout(window._nrt);window._nrt=setTimeout(()=>buildName(false),200);}
-});
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(relayout);}
+window.addEventListener('resize',relayout);
+window.addEventListener('orientationchange',relayout);
+if('ResizeObserver'in window){
+  let first=true;
+  new ResizeObserver(()=>{ if(first){first=false;return;} relayout(); }).observe(section);
+}
 
 /* ---------- скачущая лошадь у контактов: 16 фаз галопа ---------- */
 (function(){
